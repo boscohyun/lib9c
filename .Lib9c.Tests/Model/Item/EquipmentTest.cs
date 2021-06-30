@@ -1,8 +1,7 @@
-using System.Collections.Generic;
-
 namespace Lib9c.Tests.Model.Item
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Serialization.Formatters.Binary;
     using Nekoyume.Model.Item;
