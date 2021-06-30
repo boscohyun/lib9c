@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Lib9c.Tests.Model.Item
 {
     using System;
@@ -15,6 +17,17 @@ namespace Lib9c.Tests.Model.Item
         {
             var tableSheets = new TableSheets(TableSheetsImporter.ImportSheets());
             _equipmentRow = tableSheets.EquipmentItemSheet.First;
+        }
+
+        public static Equipment CreateFirstEquipment(
+            TableSheets tableSheets,
+            Guid guid = default,
+            long requiredBlockIndex = default)
+        {
+            var row = tableSheets.EquipmentItemSheet.First;
+            Assert.NotNull(row);
+
+            return new Equipment(row, guid == default ? Guid.NewGuid() : guid, requiredBlockIndex);
         }
 
         [Fact]
@@ -43,6 +56,18 @@ namespace Lib9c.Tests.Model.Item
             var deserialized = (Equipment)formatter.Deserialize(ms);
 
             Assert.Equal(costume, deserialized);
+        }
+
+        [Fact]
+        public void LevelUp()
+        {
+            var row = new EquipmentItemSheet.Row();
+            row.Set(new List<string>() { "10100000", "Weapon", "0", "Normal", "0", "ATK", "1", "2", "10100000" });
+            var equipment = (Equipment)ItemFactory.CreateItemUsable(row, default, 0, 0);
+
+            Assert.Equal(1m, equipment.StatsMap.ATK);
+            equipment.LevelUp();
+            Assert.Equal(2m, equipment.StatsMap.ATK);
         }
     }
 }
