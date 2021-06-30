@@ -61,10 +61,10 @@ namespace Nekoyume.Model.Stat
 
         public bool HasHIT => _statMaps.ContainsKey(StatType.HIT) &&
                               (_statMaps[StatType.HIT].HasValue || _statMaps[StatType.HIT].HasAdditionalValue);
-        
+
         public bool HasSPD => _statMaps.ContainsKey(StatType.SPD) &&
                               (_statMaps[StatType.SPD].HasValue || _statMaps[StatType.SPD].HasAdditionalValue);
-        
+
         public int BaseHP => HasBaseHP ? _statMaps[StatType.HP].ValueAsInt : 0;
         public decimal BaseHPAsDecimal => HasBaseHP ? _statMaps[StatType.HP].Value : 0m;
         public int BaseATK => HasBaseATK ? _statMaps[StatType.ATK].ValueAsInt : 0;
@@ -375,17 +375,17 @@ namespace Nekoyume.Model.Stat
             {
                 if (HasHP)
                 {
-                    yield return (StatType.HP, HP);
+                    yield return (StatType.HP, HPAsDecimal);
                 }
 
                 if (HasATK)
                 {
-                    yield return (StatType.ATK, ATK);
+                    yield return (StatType.ATK, ATKAsDecimal);
                 }
 
                 if (HasDEF)
                 {
-                    yield return (StatType.DEF, DEF);
+                    yield return (StatType.DEF, DEFAsDecimal);
                 }
 
                 if (HasCRI)
@@ -405,9 +405,9 @@ namespace Nekoyume.Model.Stat
             }
             else
             {
-                yield return (StatType.HP, HP);
-                yield return (StatType.ATK, ATK);
-                yield return (StatType.DEF, DEF);
+                yield return (StatType.HP, HPAsDecimal);
+                yield return (StatType.ATK, ATKAsDecimal);
+                yield return (StatType.DEF, DEFAsDecimal);
                 yield return (StatType.CRI, CRIAsDecimal);
                 yield return (StatType.HIT, HITAsDecimal);
                 yield return (StatType.SPD, SPDAsDecimal);
@@ -467,17 +467,17 @@ namespace Nekoyume.Model.Stat
             {
                 if (HasBaseHP || HasAdditionalHP)
                 {
-                    yield return (StatType.HP, BaseHP, AdditionalHP);
+                    yield return (StatType.HP, BaseHPAsDecimal, AdditionalHPAsDecimal);
                 }
 
                 if (HasBaseATK || HasAdditionalATK)
                 {
-                    yield return (StatType.ATK, BaseATK, AdditionalATK);
+                    yield return (StatType.ATK, BaseATKAsDecimal, AdditionalATKAsDecimal);
                 }
 
                 if (HasBaseDEF || HasAdditionalDEF)
                 {
-                    yield return (StatType.DEF, BaseDEF, AdditionalDEF);
+                    yield return (StatType.DEF, BaseDEFAsDecimal, AdditionalDEFAsDecimal);
                 }
 
                 if (HasBaseCRI || HasAdditionalCRI)
@@ -497,9 +497,9 @@ namespace Nekoyume.Model.Stat
             }
             else
             {
-                yield return (StatType.HP, BaseHP, AdditionalHP);
-                yield return (StatType.ATK, BaseATK, AdditionalATK);
-                yield return (StatType.DEF, BaseDEF, AdditionalDEF);
+                yield return (StatType.HP, BaseHPAsDecimal, AdditionalHPAsDecimal);
+                yield return (StatType.ATK, BaseATKAsDecimal, AdditionalATKAsDecimal);
+                yield return (StatType.DEF, BaseDEFAsDecimal, AdditionalDEFAsDecimal);
                 yield return (StatType.CRI, BaseCRIAsDecimal, AdditionalCRIAsDecimal);
                 yield return (StatType.HIT, BaseHITAsDecimal, AdditionalHITAsDecimal);
                 yield return (StatType.SPD, BaseSPDAsDecimal, AdditionalSPDAsDecimal);

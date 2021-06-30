@@ -138,9 +138,9 @@ namespace Nekoyume.Model.Stat
         public bool HasHP => HP > 0;
         public bool HasATK => ATK > 0;
         public bool HasDEF => DEF > 0;
-        public bool HasCRI => CRIAsDecimal > 0m;
-        public bool HasHIT => HITAsDecimal > 0m;
-        public bool HasSPD => SPDAsDecimal > 0m;
+        public bool HasCRI => CRI > 0;
+        public bool HasHIT => HIT > 0;
+        public bool HasSPD => SPD > 0;
 
         public IEnumerable<(StatType statType, int value)> GetStats(bool ignoreZero = default)
         {

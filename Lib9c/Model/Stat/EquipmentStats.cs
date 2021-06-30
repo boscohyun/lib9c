@@ -129,7 +129,7 @@ namespace Nekoyume.Model.Stat
                 throw new ArgumentNullException(nameof(statsMap));
             }
 
-            (decimal, decimal) SeparateValue(decimal value)
+            (decimal, decimal) SeparateValue(decimal value, bool isBaseStat = default)
             {
                 if (enhancementLevel == 0)
                 {
@@ -140,7 +140,7 @@ namespace Nekoyume.Model.Stat
                 var baseValue = 0m;
                 while (level > 0)
                 {
-                    baseValue = value / 110m * 100m;
+                    baseValue = value / (isBaseStat ? 110m : 130m) * 100m;
                     level--;
                 }
                 
@@ -153,7 +153,7 @@ namespace Nekoyume.Model.Stat
                 EnhancedDecimalStat optionStat;
                 if (statMapEx.StatType == baseStatType)
                 {
-                    var (baseValue, enhancedValue) = SeparateValue(statMapEx.Value);
+                    var (baseValue, enhancedValue) = SeparateValue(statMapEx.Value, true);
                     _baseStat = new EnhancedDecimalStat(
                         statMapEx.StatType,
                         baseValue,
@@ -181,17 +181,14 @@ namespace Nekoyume.Model.Stat
                         enhancedValue);
                 }
                 
+                // NOTE: Set option grade to `1` because `StatsMap` has no option level.
                 _optionStats.Add(new GradeAndStat(1, optionStat));
                 _allStats.Add(optionStat);
             }
             
             UpdateTotalStats();
         }
-
-        /// <summary>
-        /// Ignore base(BxDictionary) constructor
-        /// </summary>
-        /// <param name="serialized"></param>
+        
         public EquipmentStats(BxDictionary serialized)
         {
             try
@@ -249,10 +246,6 @@ namespace Nekoyume.Model.Stat
 
         #region IState
 
-        /// <summary>
-        /// Ignore base.Serialize()
-        /// </summary>
-        /// <returns></returns>
         public IValue Serialize() => BxDictionary.Empty
             .SetItem("base-stat", _baseStat.Serialize())
             .SetItem("option-stats", _optionStats.Select(e => e.Serialize()).Serialize());

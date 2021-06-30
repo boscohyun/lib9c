@@ -105,9 +105,9 @@ namespace Nekoyume.Model.Stat
         public bool HasAdditionalHP => AdditionalHP > 0;
         public bool HasAdditionalATK => AdditionalATK > 0;
         public bool HasAdditionalDEF => AdditionalDEF > 0;
-        public bool HasAdditionalCRI => AdditionalCRIAsDecimal > 0m;
-        public bool HasAdditionalHIT => AdditionalHITAsDecimal > 0m;
-        public bool HasAdditionalSPD => AdditionalSPDAsDecimal > 0m;
+        public bool HasAdditionalCRI => AdditionalCRI > 0;
+        public bool HasAdditionalHIT => AdditionalHIT > 0;
+        public bool HasAdditionalSPD => AdditionalSPD > 0;
 
         public bool HasAdditionalStats => HasAdditionalHP || HasAdditionalATK || HasAdditionalDEF || HasAdditionalCRI ||
                                           HasAdditionalHIT || HasAdditionalSPD;
