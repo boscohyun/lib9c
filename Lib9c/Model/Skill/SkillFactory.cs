@@ -1,4 +1,5 @@
 using Bencodex.Types;
+using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
 using Nekoyume.TableData;
 
@@ -35,6 +36,11 @@ namespace Nekoyume.Model.Skill
             throw new UnexpectedOperationException(
                 $"{skillRow.Id}, {skillRow.SkillType}, {skillRow.SkillTargetType}, {skillRow.SkillCategory}");
         }
+
+        public static Skill Get(SkillOption skillOption) => Get(
+            skillOption.SkillRow,
+            skillOption.power,
+            skillOption.chance);
 
         public static Skill Deserialize(Dictionary serialized) =>
             Get(
