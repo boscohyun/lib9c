@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bencodex.Types;
+using Nekoyume.Model.Item;
 using Nekoyume.Model.State;
 
 namespace Nekoyume.Model.Stat
@@ -125,6 +126,10 @@ namespace Nekoyume.Model.Stat
         private readonly Dictionary<StatType, StatMapEx> _statMaps =
             new Dictionary<StatType, StatMapEx>(StatTypeComparer.Instance);
 
+        public void Clear()
+        {
+            _statMaps.Clear();
+        }
 
         protected bool Equals(StatsMap other)
         {
@@ -164,6 +169,8 @@ namespace Nekoyume.Model.Stat
             PostStatValueChanged(key);
         }
 
+        public void AddStatValue(StatOption statOption) => AddStatValue(statOption.StatType, statOption.statValue);
+
         public void AddStatAdditionalValue(StatType key, decimal additionalValue)
         {
             if (!_statMaps.ContainsKey(key))
@@ -178,6 +185,11 @@ namespace Nekoyume.Model.Stat
         public void AddStatAdditionalValue(StatModifier statModifier)
         {
             AddStatAdditionalValue(statModifier.StatType, statModifier.Value);
+        }
+        
+        public void AddStatAdditionalValue(StatOption statOption)
+        {
+            AddStatAdditionalValue(statOption.StatType, statOption.statValue);
         }
 
         public void SetStatValue(StatType key, decimal value)
