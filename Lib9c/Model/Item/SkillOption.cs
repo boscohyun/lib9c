@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Bencodex.Types;
+using Nekoyume.Model.Skill;
 using Nekoyume.Model.State;
 using Nekoyume.TableData;
 using Serilog;
@@ -11,22 +12,19 @@ namespace Nekoyume.Model.Item
     [Serializable]
     public class SkillOption : IItemOption
     {
-        public readonly SkillSheet.Row SkillRow;
-
-        public int power;
-
-        public int chance;
+        public readonly Skill.Skill Skill;
 
         public int Grade { get; }
 
         public ItemOptionType Type => ItemOptionType.Skill;
 
-        public SkillOption(int grade, SkillSheet.Row skillRow, int power = default, int chance = default)
+        public SkillOption(int grade, Skill.Skill skill)
         {
+            Skill = skill;
             Grade = grade;
-            SkillRow = skillRow;
-            this.power = power;
-            this.chance = chance;
+            // SkillRow = skillRow;
+            // this.power = power;
+            // this.chance = chance;
         }
 
         public SkillOption(IValue serialized)
@@ -35,9 +33,10 @@ namespace Nekoyume.Model.Item
             {
                 var dict = (BxDictionary) serialized;
                 Grade = dict["grade"].ToInteger();
-                SkillRow = SkillSheet.Row.Deserialize((BxDictionary) dict["skill-row"]);
-                power = dict["power"].ToInteger();
-                chance = dict["chance"].ToInteger();
+                Skill = SkillFactory.Deserialize((BxDictionary) dict["skill"]);
+                // SkillRow = SkillSheet.Row.Deserialize((BxDictionary) dict["skill-row"]);
+                // power = dict["power"].ToInteger();
+                // chance = dict["chance"].ToInteger();
             }
             catch (Exception e) when (e is InvalidCastException || e is KeyNotFoundException)
             {
@@ -50,14 +49,18 @@ namespace Nekoyume.Model.Item
 
         public IValue Serialize() => BxDictionary.Empty
             .SetItem("grade", Grade.Serialize())
-            .SetItem("skill-row", SkillRow.Serialize())
-            .SetItem("power", power.Serialize())
-            .SetItem("chance", chance.Serialize());
+            .SetItem("skill", Skill.Serialize());
+            // .SetItem("skill-row", SkillRow.Serialize())
+            // .SetItem("power", power.Serialize())
+            // .SetItem("chance", chance.Serialize());
 
         public void Enhance(decimal ratio)
         {
-            power = decimal.ToInt32(power * (1m + ratio));
-            chance = decimal.ToInt32(chance * (1m + ratio));
+            // power = decimal.ToInt32(power * (1m + ratio));
+            // chance = decimal.ToInt32(chance * (1m + ratio));
+            Skill.Update(
+                decimal.ToInt32(Skill.Chance * (1m + ratio)),
+                decimal.ToInt32(Skill.Power * (1m + ratio)));
         }
     }
 }

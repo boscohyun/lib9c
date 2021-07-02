@@ -37,11 +37,6 @@ namespace Nekoyume.Model.Skill
                 $"{skillRow.Id}, {skillRow.SkillType}, {skillRow.SkillTargetType}, {skillRow.SkillCategory}");
         }
 
-        public static Skill Get(SkillOption skillOption) => Get(
-            skillOption.SkillRow,
-            skillOption.power,
-            skillOption.chance);
-
         public static Skill Deserialize(Dictionary serialized) =>
             Get(
                 SkillSheet.Row.Deserialize((Dictionary) serialized["skillRow"]),

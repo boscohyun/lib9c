@@ -1,19 +1,15 @@
 ﻿namespace Lib9c.Tests.Model.Item
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Nekoyume.Model.Item;
-    using Nekoyume.Model.Stat;
+    using Nekoyume.Model.Skill;
     using Nekoyume.TableData;
     using Xunit;
 
     public class SkillOptionTest
     {
-        private static readonly StatType[] StatTypes = Enum.GetValues(typeof(StatType))
-            .Cast<StatType>()
-            .Where(e => e != StatType.NONE)
-            .ToArray();
-
         private readonly SkillSheet _skillSheet;
 
         public SkillOptionTest()
@@ -23,48 +19,45 @@
             _skillSheet.Set(csv);
         }
 
+        public static IEnumerable<Skill> CreateAllSkills(SkillSheet skillSheet)
+        {
+            var random = new Random(DateTime.UtcNow.Millisecond);
+            return skillSheet.OrderedList.Select(row => SkillFactory.Get(
+                row,
+                random.Next(),
+                random.Next()));
+        }
+
         [Fact]
         public void Serialize()
         {
-            var random = new Random(DateTime.UtcNow.Millisecond);
-            foreach (var grade in Enumerable.Range(1, 10))
+            foreach (var skill in CreateAllSkills(_skillSheet))
             {
-                foreach (var row in _skillSheet)
+                foreach (var grade in Enumerable.Range(1, 10))
                 {
-                    var damage = random.Next();
-                    var chance = random.Next();
-                    var option = new SkillOption(grade, row, damage, chance);
+                    var option = new SkillOption(grade, skill);
                     var serialized = option.Serialize();
                     var deserialized = new SkillOption(serialized);
                     Assert.Equal(option.Grade, deserialized.Grade);
-                    Assert.Equal(option.SkillRow, deserialized.SkillRow);
-                    Assert.Equal(option.power, deserialized.power);
-                    Assert.Equal(option.chance, deserialized.chance);
+                    Assert.Equal(option.Skill, deserialized.Skill);
                 }
             }
         }
 
-        [Theory]
-        [InlineData(.1, 1, 1)]
-        [InlineData(.9, 1, 1)]
-        [InlineData(1.1, 1, 2)]
-        [InlineData(1.9, 1, 2)]
-        [InlineData(.1, 1000, 1100)]
-        [InlineData(.9, 1000, 1900)]
-        [InlineData(-.1, 1, 0)]
-        [InlineData(-.9, 1, 0)]
-        [InlineData(-1.1, 1, 0)]
-        [InlineData(-1.9, 1, 0)]
-        [InlineData(-2.1, 1, -1)]
-        [InlineData(-2.9, 1, -1)]
-        [InlineData(-.1, 1000, 900)]
-        [InlineData(-.9, 1000, 100)]
-        public void Enhance(decimal ratio, int from, int to)
+        [Fact]
+        public void Enhance()
         {
-            var option = new SkillOption(default, default, from, from);
-            option.Enhance(ratio);
-            Assert.Equal(to, option.power);
-            Assert.Equal(to, option.chance);
+            var random = new Random(DateTime.UtcNow.Millisecond);
+            foreach (var skill in CreateAllSkills(_skillSheet))
+            {
+                var ratio = (decimal)random.NextDouble() * 2 - 1;
+                var fromChance = skill.Chance;
+                var fromPower = skill.Power;
+                var option = new SkillOption(default, skill);
+                option.Enhance(ratio);
+                Assert.Equal(decimal.ToInt32(fromChance * ratio), option.Skill.Chance);
+                Assert.Equal(decimal.ToInt32(fromPower * ratio), option.Skill.Power);
+            }
         }
     }
 }

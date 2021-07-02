@@ -67,15 +67,16 @@ namespace Nekoyume.Model.Item
             {
                 case ConsumableItemSheet.Row consumableItemRow:
                 {
-                    var options = new List<StatOption>();
                     foreach (var statData in consumableItemRow.Stats)
                     {
                         if (_baseStatOption is null)
                         {
+                            // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
                             _baseStatOption = new StatOption(1, statData);
                         }
                         else
                         {
+                            // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
                             _statOptions.Add(new StatOption(1, statData));
                         }
                     }
@@ -87,6 +88,7 @@ namespace Nekoyume.Model.Item
                     break;
                 }
                 case EquipmentItemSheet.Row equipmentItemRow:
+                    // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
                     _baseStatOption = new StatOption(1, equipmentItemRow.Stat);
                     break;
             }
@@ -106,19 +108,12 @@ namespace Nekoyume.Model.Item
 
         protected ItemUsable(BxDictionary serialized) : base(serialized)
         {
-            if (serialized.TryGetValue((Text) "itemId", out var itemId))
-            {
-                ItemId = itemId.ToGuid();
-            }
-
-            if (serialized.TryGetValue((Text) "requiredBlockIndex", out var requiredBlockIndex))
-            {
-                RequiredBlockIndex = requiredBlockIndex.ToLong();
-            }
-
             if (serialized.ContainsKey("serialized-version"))
             {
                 _serializedVersion = serialized["serialized-version"].ToInteger();
+                
+                ItemId = serialized["item-id"].ToGuid();
+                
                 switch (_serializedVersion)
                 {
                     case 2:
@@ -128,6 +123,11 @@ namespace Nekoyume.Model.Item
             }
             else
             {
+                if (serialized.TryGetValue((Text) "itemId", out var itemId))
+                {
+                    ItemId = itemId.ToGuid();
+                }
+                
                 Deserialize1(serialized);
             }
         }
@@ -212,6 +212,11 @@ namespace Nekoyume.Model.Item
 
         private void Deserialize1(BxDictionary serialized)
         {
+            if (serialized.TryGetValue((Text) "requiredBlockIndex", out var requiredBlockIndex))
+            {
+                RequiredBlockIndex = requiredBlockIndex.ToLong();
+            }
+            
             if (serialized.TryGetValue((Text) "statsMap", out var statsMap))
             {
                 StatsMap.Deserialize((BxDictionary) statsMap);
@@ -249,34 +254,36 @@ namespace Nekoyume.Model.Item
                 .Select(e => new SkillOption(e))
                 .OrderByDescending(e => e.Grade)
                 .ToList();
+            _requiredBlockIndex = serialized["required-block-index"].ToLong();
 
             UpdateStatsMap();
             UpdateSkills();
         }
 
-        public void AddOption(IItemOption itemOption)
+        public void AddStatOption(StatOption statOption)
         {
-            switch (itemOption)
-            {
-                case StatOption statOption:
-                    _statOptions = _statOptions
-                        .Append(statOption)
-                        .OrderByDescending(e => e.Grade)
-                        .ToList();
-                    StatsMap.AddStatAdditionalValue(statOption);
-                    break;
-                case SkillOption skillOption:
-                    _skillOptions = _skillOptions
-                        .Append(skillOption)
-                        .OrderByDescending(e => e.Grade)
-                        .ToList();
-                    // NOTE: BuffSkills should be empty. Ref: CombinationEquipmentX.SelectOption()
-                    Skills.Add(SkillFactory.Get(skillOption));
-                    break;
-                default:
-                    return;
-            }
+            _statOptions = _statOptions
+                .Append(statOption)
+                .OrderByDescending(e => e.Grade)
+                .ToList();
+            StatsMap.AddStatAdditionalValue(statOption);
         }
+
+        public void AddStatOption(int grade, StatType statType, decimal statValue) =>
+            AddStatOption(new StatOption(grade, statType, statValue));
+
+        public void AddSkillOption(SkillOption skillOption)
+        {
+            _skillOptions = _skillOptions
+                .Append(skillOption)
+                .OrderByDescending(e => e.Grade)
+                .ToList();
+            // NOTE: BuffSkills should be empty. Ref: CombinationEquipmentX.SelectOption()
+            Skills.Add(skillOption.Skill);
+        }
+
+        public void AddSkillOption(int grade, Skill.Skill skill) =>
+            AddSkillOption(new SkillOption(grade, skill));
 
         private void UpdateStatsMap()
         {
@@ -314,7 +321,7 @@ namespace Nekoyume.Model.Item
             {
                 var option = options[i - 1];
                 // NOTE: BuffSkills should be empty. Ref: CombinationEquipmentX.SelectOption()
-                Skills.Add(SkillFactory.Get(option));
+                Skills.Add(option.Skill);
             }
         }
     }
