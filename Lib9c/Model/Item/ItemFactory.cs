@@ -23,6 +23,28 @@ namespace Nekoyume.Model.Item
             }
         }
 
+        public static ItemBase CreateItemV2(
+            int serializedVersion,
+            ItemSheet.Row row,
+            IRandom random,
+            int requiredCharacterLevel)
+        {
+            switch (row)
+            {
+                case CostumeItemSheet.Row costumeRow:
+                    return CreateCostume(costumeRow, random.GenerateRandomGuid());
+                case MaterialItemSheet.Row materialRow:
+                    return CreateMaterial(materialRow);
+                default:
+                    return CreateItemUsableV2(
+                        serializedVersion,
+                        row,
+                        random.GenerateRandomGuid(),
+                        0,
+                        requiredCharacterLevel);
+            }
+        }
+
         public static Costume CreateCostume(CostumeItemSheet.Row row, Guid itemId)
         {
             return new Costume(row, itemId);
