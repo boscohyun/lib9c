@@ -5,6 +5,7 @@ namespace Lib9c.Tests.Action
     using System.Runtime.Serialization.Formatters.Binary;
     using Libplanet;
     using Nekoyume.Action;
+    using Nekoyume.Model;
     using Nekoyume.Model.State;
     using Nekoyume.TableData;
     using Xunit;
@@ -237,6 +238,13 @@ namespace Lib9c.Tests.Action
         {
             var exc = new InvalidTradableIdException("for testing.");
             AssertException<InvalidTradableIdException>(exc);
+        }
+
+        [Fact]
+        public void SerializeFailedException_Serializable()
+        {
+            var exc = new SerializeFailedException("for testing.");
+            AssertException<SerializeFailedException>(exc);
         }
 
         private static void AssertException<T>(Exception exc)
