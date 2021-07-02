@@ -125,26 +125,6 @@ namespace Nekoyume.Model.Stat
         private readonly Dictionary<StatType, StatMapEx> _statMaps =
             new Dictionary<StatType, StatMapEx>(StatTypeComparer.Instance);
 
-        public StatsMap()
-        {
-        }
-
-        public StatsMap(EquipmentStats equipmentStats)
-        {
-            var stats = equipmentStats.GetBaseAndAdditionalRawStats(true).ToArray();
-            foreach (var (statType, baseValue, additionalValue) in stats)
-            {
-                if (statType == equipmentStats.BaseStatType)
-                {
-                    SetStatValue(statType, baseValue);
-                    SetStatAdditionalValue(statType, additionalValue);
-                }
-                else
-                {
-                    SetStatAdditionalValue(statType, baseValue + additionalValue);
-                }
-            }
-        }
 
         protected bool Equals(StatsMap other)
         {
