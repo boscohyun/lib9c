@@ -247,6 +247,13 @@ namespace Lib9c.Tests.Action
             AssertException<SerializeFailedException>(exc);
         }
 
+        [Fact]
+        public void DeserializeFailedException_Serializable()
+        {
+            var exc = new DeserializeFailedException("for testing.");
+            AssertException<DeserializeFailedException>(exc);
+        }
+
         private static void AssertException<T>(Exception exc)
             where T : Exception
         {
