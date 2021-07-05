@@ -19,13 +19,16 @@
             _skillSheet.Set(csv);
         }
 
-        public static IEnumerable<Skill> CreateAllSkills(SkillSheet skillSheet)
+        public static IEnumerable<Skill> CreateAllSkills(
+            SkillSheet skillSheet,
+            int maxPower = int.MaxValue / 100,
+            int maxChance = int.MaxValue / 100)
         {
             var random = new Random(DateTime.UtcNow.Millisecond);
             return skillSheet.OrderedList.Select(row => SkillFactory.Get(
                 row,
-                random.Next(),
-                random.Next()));
+                random.Next(0, maxPower),
+                random.Next(0, maxChance)));
         }
 
         [Fact]
@@ -50,13 +53,13 @@
             var random = new Random(DateTime.UtcNow.Millisecond);
             foreach (var skill in CreateAllSkills(_skillSheet))
             {
-                var ratio = (decimal)random.NextDouble() * 2 - 1;
+                var ratio = (decimal)random.NextDouble();
                 var fromChance = skill.Chance;
                 var fromPower = skill.Power;
                 var option = new SkillOption(default, skill);
                 option.Enhance(ratio);
-                Assert.Equal(decimal.ToInt32(fromChance * ratio), option.Skill.Chance);
-                Assert.Equal(decimal.ToInt32(fromPower * ratio), option.Skill.Power);
+                Assert.Equal(decimal.ToInt32(fromChance * (1 + ratio)), option.Skill.Chance);
+                Assert.Equal(decimal.ToInt32(fromPower * (1 + ratio)), option.Skill.Power);
             }
         }
     }

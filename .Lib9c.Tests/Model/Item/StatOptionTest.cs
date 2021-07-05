@@ -34,9 +34,7 @@
 
         [Theory]
         [InlineData(.1, 1, 1.1)]
-        [InlineData(.3, 1, 1.3)]
-        [InlineData(-.1, 1, .9)]
-        [InlineData(-.3, 1, .7)]
+        [InlineData(.9, 1, 1.9)]
         public void Enhance(decimal ratio, decimal from, decimal to)
         {
             var option = new StatOption(default, default, from);

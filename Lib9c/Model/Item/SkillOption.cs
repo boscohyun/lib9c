@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Bencodex.Types;
 using Nekoyume.Model.Skill;
 using Nekoyume.Model.State;
@@ -50,17 +51,30 @@ namespace Nekoyume.Model.Item
         public IValue Serialize() => BxDictionary.Empty
             .SetItem("grade", Grade.Serialize())
             .SetItem("skill", Skill.Serialize());
-            // .SetItem("skill-row", SkillRow.Serialize())
-            // .SetItem("power", power.Serialize())
-            // .SetItem("chance", chance.Serialize());
 
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        /// <exception cref="OverflowException"></exception>
         public void Enhance(decimal ratio)
         {
-            // power = decimal.ToInt32(power * (1m + ratio));
-            // chance = decimal.ToInt32(chance * (1m + ratio));
-            Skill.Update(
-                decimal.ToInt32(Skill.Chance * (1m + ratio)),
-                decimal.ToInt32(Skill.Power * (1m + ratio)));
+            if (ratio < 0 || ratio > 1)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(ratio),
+                    ratio,
+                    $"{nameof(ratio)} greater than or equal to 0 and less than or equal to 1");
+            }
+
+            try
+            {
+                Skill.Update(
+                    decimal.ToInt32(Skill.Chance * (1 + ratio)),
+                    decimal.ToInt32(Skill.Power * (1 + ratio)));
+            }
+            catch (OverflowException e)
+            {
+                Log.Error("{Exception}", e.ToString());
+                throw;
+            }
         }
     }
 }

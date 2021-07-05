@@ -52,13 +52,13 @@ namespace Nekoyume.Model.Item
         }
 
         public static StatOption Deserialize(IValue serialized) => new StatOption(serialized);
-        
+
         public static bool TryDeserialize(IValue serialized, out StatOption statOption)
         {
             statOption = serialized is BxDictionary
                 ? Deserialize(serialized)
                 : null;
-            
+
             return (statOption is null);
         }
 
@@ -67,9 +67,27 @@ namespace Nekoyume.Model.Item
             .SetItem("stat-type", StatType.Serialize())
             .SetItem("stat-value", statValue.Serialize());
 
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        /// <exception cref="OverflowException"></exception>
         public void Enhance(decimal ratio)
         {
-            statValue *= 1m + ratio;
+            if (ratio < 0 || ratio > 1)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(ratio),
+                    ratio,
+                    $"{nameof(ratio)} greater than or equal to 0 and less than or equal to 1");
+            }
+
+            try
+            {
+                statValue *= 1m + ratio;
+            }
+            catch (OverflowException e)
+            {
+                Log.Error("{Exception}", e.ToString());
+                throw;
+            }
         }
     }
 }

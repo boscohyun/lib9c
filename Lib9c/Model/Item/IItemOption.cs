@@ -8,7 +8,7 @@ namespace Nekoyume.Model.Item
 
         int Grade { get; }
         
-        /// <param name="ratio">(0 ~ 1)</param>
+        /// <param name="ratio">(0...1)</param>
         void Enhance(decimal ratio);
     }
 }
