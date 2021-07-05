@@ -119,6 +119,8 @@ namespace Nekoyume.Model.Item
                     case 2:
                         Deserialize2(serialized);
                         break;
+                    default:
+                        throw new DeserializeFailedException($"Deserialize for version({_serializedVersion}) is not implemented");
                 }
             }
             else
