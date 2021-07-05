@@ -14,7 +14,7 @@ namespace Nekoyume.Action
 {
     [Serializable]
     [ActionType("claim_monster_collection_reward2")]
-    public class ClaimMonsterCollectionReward : GameAction
+    public class ClaimMonsterCollectionReward2 : GameAction
     {
         public Address avatarAddress;
         public override IAccountStateDelta Execute(IActionContext context)
@@ -70,10 +70,9 @@ namespace Nekoyume.Action
             foreach (MonsterCollectionRewardSheet.RewardInfo rewardInfo in rewards)
             {
                 ItemSheet.Row row = itemSheet[rewardInfo.ItemId];
-                // TODO: `development` 브랜치에 머지하기 전에 필요 캐릭터 레벨을 업데이트 해야합니다.
                 ItemBase item = row is MaterialItemSheet.Row materialRow
                     ? ItemFactory.CreateTradableMaterial(materialRow)
-                    : ItemFactory.CreateItemV2(2, row, context.Random, 1);
+                    : ItemFactory.CreateItem(row, context.Random);
                 avatarState.inventory.AddItem(item, rewardInfo.Quantity);
             }
             monsterCollectionState.Claim(context.BlockIndex);

@@ -20,8 +20,8 @@ using static Lib9c.SerializeKeys;
 namespace Nekoyume.Action
 {
     [Serializable]
-    [ActionType("combination_equipment7")]
-    public class CombinationEquipment : GameAction
+    [ActionType("combination_equipment6")]
+    public class CombinationEquipment6 : GameAction
     {
         public static readonly Address BlacksmithAddress = ItemEnhancement.BlacksmithAddress;
 
@@ -129,13 +129,10 @@ namespace Nekoyume.Action
             }
 
             var requiredBlockIndex = ctx.BlockIndex + recipe.RequiredBlockIndex;
-            // TODO: `development` 브랜치에 머지하기 전에 필요 캐릭터 레벨을 업데이트 해야합니다.
-            var equipment = (Equipment) ItemFactory.CreateItemUsableV2(
-                2,
+            var equipment = (Equipment) ItemFactory.CreateItemUsable(
                 equipRow,
                 ctx.Random.GenerateRandomGuid(),
-                requiredBlockIndex,
-                1
+                requiredBlockIndex
             );
 
             // Validate sub recipe.
@@ -172,12 +169,8 @@ namespace Nekoyume.Action
                     materials[subMaterial] = materialInfo.Count;
                 }
 
-                optionIds = SelectOption(
-                    states.GetSheet<EquipmentItemOptionSheet>(),
-                    states.GetSheet<SkillSheet>(),
-                    subRecipe,
-                    ctx.Random,
-                    equipment);
+                optionIds = CombinationEquipment4.SelectOption(states.GetSheet<EquipmentItemOptionSheet>(), states.GetSheet<SkillSheet>(),
+                    subRecipe, ctx.Random, equipment);
                 equipment.Update(requiredBlockIndex);
             }
 
@@ -263,16 +256,13 @@ namespace Nekoyume.Action
             SlotIndex = plainValue["slotIndex"].ToInteger();
         }
 
-        public static StatOption GetStatOption(int grade, EquipmentItemOptionSheet.Row row, IRandom random)
+        public static StatMap GetStat(EquipmentItemOptionSheet.Row row, IRandom random)
         {
             var value = random.Next(row.StatMin, row.StatMax + 1);
-            return new StatOption(grade, row.StatType, value);
+            return new StatMap(row.StatType, value);
         }
 
-        public static SkillOption GetSkillOption(
-            int grade,
-            EquipmentItemOptionSheet.Row row,
-            SkillSheet skillSheet,
+        public static Skill GetSkill(EquipmentItemOptionSheet.Row row, SkillSheet skillSheet,
             IRandom random)
         {
             try
@@ -281,73 +271,12 @@ namespace Nekoyume.Action
                 var dmg = random.Next(row.SkillDamageMin, row.SkillDamageMax + 1);
                 var chance = random.Next(row.SkillChanceMin, row.SkillChanceMax + 1);
                 var skill = SkillFactory.Get(skillRow, dmg, chance);
-                return new SkillOption(grade, skill);
+                return skill;
             }
             catch (InvalidOperationException)
             {
                 return null;
             }
-        }
-        
-        public static HashSet<int> SelectOption(
-            EquipmentItemOptionSheet optionSheet,
-            SkillSheet skillSheet,
-            EquipmentItemSubRecipeSheet.Row subRecipe,
-            IRandom random,
-            Equipment equipment
-        )
-        {
-            var optionSelector = new WeightedSelector<EquipmentItemOptionSheet.Row>(random);
-            var optionIds = new HashSet<int>();
-
-            // Skip sort subRecipe.Options because it had been already sorted in WeightedSelector.Select();
-            foreach (var optionInfo in subRecipe.Options)
-            {
-                if (!optionSheet.TryGetValue(optionInfo.Id, out var optionRow))
-                {
-                    continue;
-                }
-
-                optionSelector.Add(optionRow, optionInfo.Ratio);
-            }
-
-            IEnumerable<EquipmentItemOptionSheet.Row> optionRows =
-                new EquipmentItemOptionSheet.Row[0];
-            try
-            {
-                optionRows = optionSelector.SelectV3(subRecipe.MaxOptionLimit);
-            }
-            catch (Exception e) when (
-                e is InvalidCountException ||
-                e is ListEmptyException
-            )
-            {
-                return optionIds;
-            }
-            finally
-            {
-                foreach (var optionRow in optionRows.OrderBy(r => r.Id))
-                {
-                    if (optionRow.StatType != StatType.NONE)
-                    {
-                        // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
-                        equipment.AddStatOption(GetStatOption(1 /* optionRow.grade */, optionRow, random));
-                    }
-                    else
-                    {
-                        // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
-                        var skillOption = GetSkillOption(1 /* optionRow.grade */, optionRow, skillSheet, random);
-                        if (!(skillOption is null))
-                        {
-                            equipment.AddSkillOption(skillOption);
-                        }
-                    }
-
-                    optionIds.Add(optionRow.Id);
-                }
-            }
-
-            return optionIds;
         }
     }
 }

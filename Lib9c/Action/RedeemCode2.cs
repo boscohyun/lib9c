@@ -14,18 +14,18 @@ using static Lib9c.SerializeKeys;
 namespace Nekoyume.Action
 {
     [Serializable]
-    [ActionType("redeem_code3")]
-    public class RedeemCode : GameAction
+    [ActionType("redeem_code2")]
+    public class RedeemCode2 : GameAction
     {
         public string Code { get; internal set; }
 
         public Address AvatarAddress {get; internal set; }
 
-        public RedeemCode()
+        public RedeemCode2()
         {
         }
 
-        public RedeemCode(string code, Address avatarAddress)
+        public RedeemCode2(string code, Address avatarAddress)
         {
             Code = code;
             AvatarAddress = avatarAddress;
@@ -91,13 +91,8 @@ namespace Nekoyume.Action
                         {
                             if (info.ItemId is int itemId)
                             {
-                                // TODO: `development` 브랜치에 머지하기 전에 필요 캐릭터 레벨을 업데이트 해야합니다.
-                                var item = ItemFactory.CreateItemV2(
-                                    2,
-                                    itemSheets[itemId],
-                                    context.Random,
-                                    1);
-                                // We should fix count as 1 because ItemFactory.CreateItemV2
+                                ItemBase item = ItemFactory.CreateItem(itemSheets[itemId], context.Random);
+                                // We should fix count as 1 because ItemFactory.CreateItem
                                 // will create a new item every time.
                                 avatarState.inventory.AddItem(item, count: 1);
                             }
