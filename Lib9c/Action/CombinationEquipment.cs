@@ -129,13 +129,17 @@ namespace Nekoyume.Action
             }
 
             var requiredBlockIndex = ctx.BlockIndex + recipe.RequiredBlockIndex;
-            // TODO: `development` 브랜치에 머지하기 전에 필요 캐릭터 레벨을 업데이트 해야합니다.
+            var itemRequirementSheet = states.GetSheet<ItemRequirementSheet>();
+            var requirementCharacterLevel =
+                itemRequirementSheet.TryGetValue(equipRow.Id, out var itemRequirementRow)
+                    ? itemRequirementRow.Level
+                    : 1;
             var equipment = (Equipment) ItemFactory.CreateItemUsableV2(
                 2,
                 equipRow,
                 ctx.Random.GenerateRandomGuid(),
                 requiredBlockIndex,
-                1
+                requirementCharacterLevel
             );
 
             // Validate sub recipe.
@@ -173,7 +177,7 @@ namespace Nekoyume.Action
                 }
 
                 optionIds = SelectOption(
-                    states.GetSheet<EquipmentItemOptionSheet>(),
+                    states.GetSheet<EquipmentItemOptionSheetV2>(),
                     states.GetSheet<SkillSheet>(),
                     subRecipe,
                     ctx.Random,
@@ -263,15 +267,14 @@ namespace Nekoyume.Action
             SlotIndex = plainValue["slotIndex"].ToInteger();
         }
 
-        public static StatOption GetStatOption(int grade, EquipmentItemOptionSheet.Row row, IRandom random)
+        public static StatOption GetStatOption(EquipmentItemOptionSheetV2.Row row, IRandom random)
         {
             var value = random.Next(row.StatMin, row.StatMax + 1);
-            return new StatOption(grade, row.StatType, value);
+            return new StatOption(row.Grade, row.StatType, value);
         }
 
         public static SkillOption GetSkillOption(
-            int grade,
-            EquipmentItemOptionSheet.Row row,
+            EquipmentItemOptionSheetV2.Row row,
             SkillSheet skillSheet,
             IRandom random)
         {
@@ -281,7 +284,7 @@ namespace Nekoyume.Action
                 var dmg = random.Next(row.SkillDamageMin, row.SkillDamageMax + 1);
                 var chance = random.Next(row.SkillChanceMin, row.SkillChanceMax + 1);
                 var skill = SkillFactory.Get(skillRow, dmg, chance);
-                return new SkillOption(grade, skill);
+                return new SkillOption(row.Grade, skill);
             }
             catch (InvalidOperationException)
             {
@@ -290,14 +293,14 @@ namespace Nekoyume.Action
         }
         
         public static HashSet<int> SelectOption(
-            EquipmentItemOptionSheet optionSheet,
+            EquipmentItemOptionSheetV2 optionSheet,
             SkillSheet skillSheet,
             EquipmentItemSubRecipeSheet.Row subRecipe,
             IRandom random,
             Equipment equipment
         )
         {
-            var optionSelector = new WeightedSelector<EquipmentItemOptionSheet.Row>(random);
+            var optionSelector = new WeightedSelector<EquipmentItemOptionSheetV2.Row>(random);
             var optionIds = new HashSet<int>();
 
             // Skip sort subRecipe.Options because it had been already sorted in WeightedSelector.Select();
@@ -311,8 +314,8 @@ namespace Nekoyume.Action
                 optionSelector.Add(optionRow, optionInfo.Ratio);
             }
 
-            IEnumerable<EquipmentItemOptionSheet.Row> optionRows =
-                new EquipmentItemOptionSheet.Row[0];
+            IEnumerable<EquipmentItemOptionSheetV2.Row> optionRows =
+                new EquipmentItemOptionSheetV2.Row[0];
             try
             {
                 optionRows = optionSelector.SelectV3(subRecipe.MaxOptionLimit);
@@ -331,12 +334,13 @@ namespace Nekoyume.Action
                     if (optionRow.StatType != StatType.NONE)
                     {
                         // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
-                        equipment.AddStatOption(GetStatOption(1 /* optionRow.grade */, optionRow, random));
+                        
+                        equipment.AddStatOption(GetStatOption(optionRow, random));
                     }
                     else
                     {
                         // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
-                        var skillOption = GetSkillOption(1 /* optionRow.grade */, optionRow, skillSheet, random);
+                        var skillOption = GetSkillOption(optionRow, skillSheet, random);
                         if (!(skillOption is null))
                         {
                             equipment.AddSkillOption(skillOption);

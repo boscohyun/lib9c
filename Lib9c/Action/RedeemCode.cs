@@ -81,6 +81,7 @@ namespace Nekoyume.Action
 
             var row = states.GetSheet<RedeemRewardSheet>().Values.First(r => r.Id == redeemId);
             var itemSheets = states.GetItemSheet();
+            var itemRequirementSheet = states.GetSheet<ItemRequirementSheet>();
 
             foreach (RedeemRewardSheet.RewardInfo info in row.Rewards)
             {
@@ -89,18 +90,23 @@ namespace Nekoyume.Action
                     case RewardType.Item:
                         for (var i = 0; i < info.Quantity; i++)
                         {
-                            if (info.ItemId is int itemId)
+                            if (!(info.ItemId is int itemId))
                             {
-                                // TODO: `development` 브랜치에 머지하기 전에 필요 캐릭터 레벨을 업데이트 해야합니다.
-                                var item = ItemFactory.CreateItemV2(
-                                    2,
-                                    itemSheets[itemId],
-                                    context.Random,
-                                    1);
-                                // We should fix count as 1 because ItemFactory.CreateItemV2
-                                // will create a new item every time.
-                                avatarState.inventory.AddItem(item, count: 1);
+                                continue;
                             }
+                            
+                            var requirementCharacterLevel =
+                                itemRequirementSheet.TryGetValue(itemId, out var itemRequirementRow)
+                                    ? itemRequirementRow.Level
+                                    : 1;
+                            var item = ItemFactory.CreateItemV2(
+                                2,
+                                itemSheets[itemId],
+                                context.Random,
+                                requirementCharacterLevel);
+                            // We should fix count as 1 because ItemFactory.CreateItemV2
+                            // will create a new item every time.
+                            avatarState.inventory.AddItem(item, count: 1);
                         }
                         break;
                     case RewardType.Gold:

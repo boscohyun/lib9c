@@ -296,7 +296,7 @@ namespace Lib9c.Tests.Action
             while (i < 10000)
             {
                 var ids = CombinationEquipment.SelectOption(
-                    _tableSheets.EquipmentItemOptionSheet,
+                    _tableSheets.EquipmentItemOptionSheetV2,
                     _tableSheets.SkillSheet,
                     subRecipe,
                     _random,

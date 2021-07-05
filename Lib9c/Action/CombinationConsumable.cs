@@ -185,13 +185,17 @@ namespace Nekoyume.Action
             // 조합 결과 획득.
             var requiredBlockIndex = ctx.BlockIndex + recipeRow.RequiredBlockIndex;
             var itemId = ctx.Random.GenerateRandomGuid();
-            // TODO: `development` 브랜치에 머지하기 전에 필요 캐릭터 레벨을 업데이트 해야합니다.
+            var itemRequirementSheet = states.GetSheet<ItemRequirementSheet>();
+            var requirementCharacterLevel =
+                itemRequirementSheet.TryGetValue(consumableItemRow.Id, out var itemRequirementRow)
+                    ? itemRequirementRow.Level
+                    : 1;
             var itemUsable = ItemFactory.CreateItemUsableV2(
                 2,
                 consumableItemRow,
                 itemId,
                 requiredBlockIndex,
-                1);
+                requirementCharacterLevel);
             // 액션 결과
             result.itemUsable = itemUsable;
             var mail = new CombinationMail(

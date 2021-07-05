@@ -61,19 +61,23 @@ namespace Nekoyume.Action
                 throw new RequiredBlockIndexException($"{collectionAddress} is not available yet");
             }
 
-            Guid id = context.Random.GenerateRandomGuid();
+            var id = context.Random.GenerateRandomGuid();
             var result = new MonsterCollectionResult(id, avatarAddress, rewards);
             var mail = new MonsterCollectionMail(result, context.BlockIndex, id, context.BlockIndex);
             avatarState.UpdateV3(mail);
 
-            ItemSheet itemSheet = states.GetItemSheet();
+            var itemSheet = states.GetItemSheet();
             foreach (MonsterCollectionRewardSheet.RewardInfo rewardInfo in rewards)
             {
-                ItemSheet.Row row = itemSheet[rewardInfo.ItemId];
-                // TODO: `development` 브랜치에 머지하기 전에 필요 캐릭터 레벨을 업데이트 해야합니다.
-                ItemBase item = row is MaterialItemSheet.Row materialRow
+                var row = itemSheet[rewardInfo.ItemId];
+                var itemRequirementSheet = states.GetSheet<ItemRequirementSheet>();
+                var requirementCharacterLevel =
+                    itemRequirementSheet.TryGetValue(row.Id, out var itemRequirementRow)
+                        ? itemRequirementRow.Level
+                        : 1;
+                var item = row is MaterialItemSheet.Row materialRow
                     ? ItemFactory.CreateTradableMaterial(materialRow)
-                    : ItemFactory.CreateItemV2(2, row, context.Random, 1);
+                    : ItemFactory.CreateItemV2(2, row, context.Random, requirementCharacterLevel);
                 avatarState.inventory.AddItem(item, rewardInfo.Quantity);
             }
             monsterCollectionState.Claim(context.BlockIndex);

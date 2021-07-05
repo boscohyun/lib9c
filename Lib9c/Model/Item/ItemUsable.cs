@@ -71,12 +71,12 @@ namespace Nekoyume.Model.Item
                     {
                         if (_baseStatOption is null)
                         {
-                            // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
+                            // NOTE: 소모품 옵션의 등급은 1로 고정합니다.
                             _baseStatOption = new StatOption(1, statData);
                         }
                         else
                         {
-                            // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
+                            // NOTE: 소모품 옵션의 등급은 1로 고정합니다.
                             _statOptions.Add(new StatOption(1, statData));
                         }
                     }
@@ -88,7 +88,7 @@ namespace Nekoyume.Model.Item
                     break;
                 }
                 case EquipmentItemSheet.Row equipmentItemRow:
-                    // TODO: `development` 브랜치에 머지하기 전에 필요 옵션 등급을 업데이트 해야합니다.
+                    // NOTE: 주 옵션의 등급은 1로 고정합니다.
                     _baseStatOption = new StatOption(1, equipmentItemRow.Stat);
                     break;
             }

@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 
 namespace Nekoyume.Model
 {
+    [Serializable]
     public class DeserializeFailedException : Exception
     {
         public DeserializeFailedException(string message) : base(message)
