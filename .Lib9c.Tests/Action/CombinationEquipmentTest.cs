@@ -92,11 +92,13 @@ namespace Lib9c.Tests.Action
 
             foreach (var materialInfo in _tableSheets.EquipmentItemSubRecipeSheet[255].Materials)
             {
-                var subMaterial = ItemFactory.CreateItemV2(
-                    2,
-                    _tableSheets.MaterialItemSheet[materialInfo.Id],
-                    _random,
-                    1);
+                var subMaterial = backward
+                    ? ItemFactory.CreateItem(_tableSheets.MaterialItemSheet[materialInfo.Id], _random)
+                    : ItemFactory.CreateItemV2(
+                        2,
+                        _tableSheets.MaterialItemSheet[materialInfo.Id],
+                        _random,
+                        1);
                 _avatarState.inventory.AddItem(subMaterial, count: materialInfo.Count);
             }
 
