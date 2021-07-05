@@ -169,10 +169,32 @@ namespace Nekoyume.Model.Item
         {
             RequiredBlockIndex = blockIndex;
         }
-
+        
         public override IValue Serialize()
         {
             switch (_serializedVersion)
+            {
+                case 1:
+                    return Serialize1();
+                case 2:
+                    return Serialize2();
+                default:
+                    throw new SerializeFailedException($"Serialize{_serializedVersion}() is not implemented");
+            }
+        }
+        
+        /// <summary>
+        /// We can migrate serializedVersion(fromVersion) objects to serializedVersion(toVersion) like below.
+        /// </summary>
+        /// <param name="toVersion"></param>
+        public IValue MigrateSerialisedVersion(int toVersion)
+        {
+            if (toVersion == _serializedVersion)
+            {
+                return Serialize();
+            }
+
+            switch (toVersion)
             {
                 case 1:
                     return Serialize1();
@@ -285,18 +307,85 @@ namespace Nekoyume.Model.Item
         public void AddSkillOption(int grade, Skill.Skill skill) =>
             AddSkillOption(new SkillOption(grade, skill));
 
+        protected void UpdateBaseOptionAndOtherOptions(
+            StatType baseStatType = default,
+            StatsMap statsMap = default,
+            List<Skill.Skill> skills = default,
+            List<Skill.BuffSkill> buffSkills = default)
+        {
+            if (!(statsMap is null))
+            {
+                // StatsMap to `_baseStatOption` and `_statOptions`
+                var statMaps = statsMap.GetStats();
+                foreach (var statMapEx in statMaps)
+                {
+                    if (statMapEx.StatType == baseStatType)
+                    {
+                        // NOTE: Set option grade to `1` because `StatsMap` has no option level.
+                        _baseStatOption = new StatOption(
+                            1,
+                            statMapEx.StatType,
+                            statMapEx.Value);
+                    
+                        if (statMapEx.AdditionalValue == 0)
+                        {
+                            continue;
+                        }
+
+                        // NOTE: Set option grade to `1` because `StatsMap` has no option level.
+                        _statOptions.Add(new StatOption(
+                            1,
+                            statMapEx.StatType,
+                            statMapEx.AdditionalValue));
+                    }
+                    else
+                    {
+                        // NOTE: Set option grade to `1` because `StatsMap` has no option level.
+                        _statOptions.Add(new StatOption(
+                            1,
+                            statMapEx.StatType,
+                            statMapEx.Value));
+                    }
+                }
+            }
+            
+            // Skills to `_skillOptions`
+            if (!(skills is null))
+            {
+                foreach (var skill in skills)
+                {
+                    _skillOptions.Add(new SkillOption(1, skill));
+                }    
+            }
+
+            // BuffSkills to `_skillOptions`
+            if (!(buffSkills is null))
+            {
+                foreach (var buffSkill in buffSkills)
+                {
+                    _skillOptions.Add(new SkillOption(1, buffSkill));
+                }
+            }
+        }
+
         private void UpdateStatsMap()
         {
             StatsMap.Clear();
 
+            var options = _statOptions.ToArray();
             if (_baseStatOption is null)
             {
+                for (var i = options.Length; i > 0; i--)
+                {
+                    var option = options[i - 1];
+                    StatsMap.AddStatAdditionalValue(option);
+                }
+
                 return;
             }
 
             StatsMap.AddStatValue(_baseStatOption.StatType, _baseStatOption.statValue);
 
-            var options = _statOptions.ToArray();
             for (var i = options.Length; i > 0; i--)
             {
                 var option = options[i - 1];

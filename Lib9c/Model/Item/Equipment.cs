@@ -76,6 +76,12 @@ namespace Nekoyume.Model.Item
             {
                 SpineResourcePath = (Text) spineResourcePath;
             }
+            
+            UpdateBaseOptionAndOtherOptions(
+                UniqueStatType,
+                StatsMap,
+                Skills,
+                BuffSkills);
         }
 
         protected Equipment(SerializationInfo info, StreamingContext _)

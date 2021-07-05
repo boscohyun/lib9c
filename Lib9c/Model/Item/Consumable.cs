@@ -39,6 +39,12 @@ namespace Nekoyume.Model.Item
             {
                 Stats = stats.ToList(i => new StatMap((Dictionary) i));
             }
+            
+            UpdateBaseOptionAndOtherOptions(
+                MainStat,
+                StatsMap,
+                Skills,
+                BuffSkills);
         }
         
         protected Consumable(SerializationInfo info, StreamingContext _)
